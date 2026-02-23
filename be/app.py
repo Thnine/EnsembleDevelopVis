@@ -5,7 +5,7 @@ import numpy as np
 import json
 from flask_cors import CORS
 from sklearn.neighbors import kneighbors_graph
-import arviz as az
+# import arviz as az
 
 app = Flask(__name__)
 CORS(app)
@@ -102,37 +102,37 @@ def grid_partition(X, grid_num=20, min_thres=5):
     )
     
     
-def getHDI(data, hdi_thres=0.5, filter_relS_thres=0.3):
+# def getHDI(data, hdi_thres=0.5, filter_relS_thres=0.3):
     
-    import arviz as az
+#     import arviz as az
     
-    intervals = az.hdi(
-        data,
-        hdi_prob=hdi_thres,
-        multimodal=True
-    )
-    intervals_counts = np.array([
-        np.sum((data >= l) & (data <= r))
-        for l, r in intervals
-    ])
-    intervals_strength = intervals_counts / intervals_counts.sum()
+#     intervals = az.hdi(
+#         data,
+#         hdi_prob=hdi_thres,
+#         multimodal=True
+#     )
+#     intervals_counts = np.array([
+#         np.sum((data >= l) & (data <= r))
+#         for l, r in intervals
+#     ])
+#     intervals_strength = intervals_counts / intervals_counts.sum()
     
-    strength_mask = intervals_strength >= filter_relS_thres
+#     strength_mask = intervals_strength >= filter_relS_thres
     
-    if not np.any(strength_mask):
-        # 保留 top-k 区间，而不是全删
+#     if not np.any(strength_mask):
+#         # 保留 top-k 区间，而不是全删
         
-        k = min(4, len(intervals))
-        top_idx = np.argsort(intervals_strength)[-k:]
-        strength_mask = np.zeros_like(intervals_strength, dtype=bool)
-        strength_mask[top_idx] = True
+#         k = min(4, len(intervals))
+#         top_idx = np.argsort(intervals_strength)[-k:]
+#         strength_mask = np.zeros_like(intervals_strength, dtype=bool)
+#         strength_mask[top_idx] = True
         
     
-    # 筛选掉强度过低的区间
-    intervals = intervals[strength_mask]
-    intervals_strength = intervals_strength[strength_mask]
+#     # 筛选掉强度过低的区间
+#     intervals = intervals[strength_mask]
+#     intervals_strength = intervals_strength[strength_mask]
 
-    return intervals,intervals_strength
+#     return intervals,intervals_strength
 
 def getHDI2(data, hdi_thres=0.5, filter_relS_thres=0.3, bins=12):
     data = np.asarray(data)
@@ -229,7 +229,7 @@ def read_data(project_name):
 
 # 初始化视图，返回所有基因的平均速度
 @app.route("/init_plot_GridVis1", methods=["POST"])
-def init_plot():
+def init_plot_GridVis1():
     
     # 读取参数
     reqParams = json.loads(request.get_data())
@@ -383,7 +383,29 @@ def update_plot():
         'meanVelo': meanVelos,
     }))
 
+
+
+@app.route("/init_plot_GridVis2", methods=["POST"])
+def init_plot_GridVis2():
+    # 读取参数
+    reqParams = json.loads(request.get_data())
+    project_name = reqParams['project_name']
+    adata = read_data(project_name)
+
+    embedding = adata.obsm['X_embedding']
+    cluster_color = adata.obs['clusters_color']
+    velocity_embedding = adata.uns['velo2D']['M6']
+
+
+    return jsonify(jsonify_safe({
+        'embedding': embedding.tolist(),
+        'velocity_embedding': velocity_embedding.tolist(),
+        'cluster_color':cluster_color.tolist(),
+        'type':'GridVis2'
+    }))
+
+
+
 if __name__ == '__main__': ##!important vscode的debug不会走该路径执行该函数..
 
-    
     app.run(port = 5005,debug=True)

@@ -1,3 +1,5 @@
+<!--Grid组件-->
+
 <template>
     <div class="GridVis1-container">
         <svg ref="canvas" class="canvas"></svg>
