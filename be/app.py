@@ -340,89 +340,89 @@ def read_data(project_name):
 # @app.route("/init_plot_GridVis1", methods=["POST"])
 # def init_plot_GridVis1():
     
-#     # 读取参数
-#     reqParams = json.loads(request.get_data())
-#     project_name = reqParams['project_name']
-#     adata = read_data(project_name)
+    # 读取参数
+    reqParams = json.loads(request.get_data())
+    project_name = reqParams['project_name']
+    adata = read_data(project_name)
     
-#     embeddings = adata.obsm['X_embedding']
-#     velo2D = adata.uns['velo2D']['M6']
-#     clusters_color = adata.obs['clusters_color']
+    embeddings = adata.obsm['X_embedding']
+    velo2D = adata.uns['velo2D']['all']
+    clusters_color = adata.obs['clusters_color']
     
-#     # grid partition
-#     point_gridLabels, grid_centers, grid_size, gird_bounds = grid_partition(embeddings,grid_num=30)
+    # grid partition
+    point_gridLabels, grid_centers, grid_size, gird_bounds = grid_partition(embeddings,grid_num=30)
 
-#     # aggregate in grid
-#     VeloDirCI = []
-#     meanVelos = []
-#     grid_colors = []
+    # aggregate in grid
+    VeloDirCI = []
+    meanVelos = []
+    grid_colors = []
 
-#     valid_grids = np.unique(point_gridLabels)
-#     valid_grids = valid_grids[valid_grids >= 0]
-#     for gid in valid_grids:
-#         # 提取gird中的速度向量
-#         mask = point_gridLabels == gid
-#         data = velo2D[mask]  # n_points * n_genes * 2
+    valid_grids = np.unique(point_gridLabels)
+    valid_grids = valid_grids[valid_grids >= 0]
+    for gid in valid_grids:
+        # 提取gird中的速度向量
+        mask = point_gridLabels == gid
+        data = velo2D[mask]  # n_points * n_genes * 2
 
-#         data = data.reshape(-1, 2)
-#         angles = np.arctan2(data[:, 1], data[:, 0])
+        data = data.reshape(-1, 2)
+        angles = np.arctan2(data[:, 1], data[:, 0])
 
-#         # data = data.reshape(data.shape[0],-1, 2)
+        # data = data.reshape(data.shape[0],-1, 2)
 
-#         # grid_intervals = []
-#         # grid_intervals_strengths = []
+        # grid_intervals = []
+        # grid_intervals_strengths = []
 
-#         # for cell_velos in data: # 以细胞为单位先做HDI
-#         #     cell_angles =  np.arctan2(cell_velos[:, 1], cell_velos[:, 0])
-#         #     intervals,intervals_strength = getHDI(cell_angles,hdi_thres=0.7, filter_relS_thres=0.2)
-#         #     for i, s in zip(intervals,intervals_strength):
-#         #         grid_intervals.append(i)
-#         #         grid_intervals_strengths.append(s)
+        # for cell_velos in data: # 以细胞为单位先做HDI
+        #     cell_angles =  np.arctan2(cell_velos[:, 1], cell_velos[:, 0])
+        #     intervals,intervals_strength = getHDI(cell_angles,hdi_thres=0.7, filter_relS_thres=0.2)
+        #     for i, s in zip(intervals,intervals_strength):
+        #         grid_intervals.append(i)
+        #         grid_intervals_strengths.append(s)
 
 
-#         # grid_samples = accumulate_angle_density(
-#         #     grid_intervals,
-#         #     grid_intervals_strengths,
-#         #     bins=360,
-#         #     total_samples=3600,
-#         # )
+        # grid_samples = accumulate_angle_density(
+        #     grid_intervals,
+        #     grid_intervals_strengths,
+        #     bins=360,
+        #     total_samples=3600,
+        # )
 
-#         # mean_intervals, mean_intervals_strengths = getHDI(grid_samples, hdi_thres=0.7, filter_relS_thres=0.2)    
-#         # mean_intervals, mean_intervals_strengths = getHDI2(angles, hdi_thres=1, filter_relS_thres=0,bins=12)
+        # mean_intervals, mean_intervals_strengths = getHDI(grid_samples, hdi_thres=0.7, filter_relS_thres=0.2)    
+        # mean_intervals, mean_intervals_strengths = getHDI2(angles, hdi_thres=1, filter_relS_thres=0,bins=12)
         
-#         mean_intervals, mean_intervals_strengths = dir_partition(angles, bins=12)    
+        mean_intervals, mean_intervals_strengths = dir_partition(angles, bins=12)    
 
-#         # 计算平均值
-#         # meanVelo = np.mean(velocity_embedding[mask],axis=0).tolist()
-#         meanVelo = np.mean(data.reshape(-1,2),axis=0)
-#         meanVelos.append(meanVelo)
+        # 计算平均值
+        # meanVelo = np.mean(velocity_embedding[mask],axis=0).tolist()
+        meanVelo = np.mean(data.reshape(-1,2),axis=0)
+        meanVelos.append(meanVelo)
         
-#         # 计算grid的聚类
-#         grid_colors.append(
-#             np.unique(clusters_color[mask], return_counts=True)[0][np.unique(clusters_color[mask], return_counts=True)[1].argmax()]        
-#         )
+        # 计算grid的聚类
+        grid_colors.append(
+            np.unique(clusters_color[mask], return_counts=True)[0][np.unique(clusters_color[mask], return_counts=True)[1].argmax()]        
+        )
             
-#         VeloDirCI.append([{'interval':interval,'strength':strength} for interval,strength in zip(mean_intervals,mean_intervals_strengths)])
+        VeloDirCI.append([{'interval':interval,'strength':strength} for interval,strength in zip(mean_intervals,mean_intervals_strengths)])
 
 
 
-#     data = {}
-#     data['name'] = project_name
-#     data['type'] = 'GridVis1'
-#     data['nCells'] = adata.shape[0]
-#     data['nGenes'] = adata.shape[1]
-#     data['embeddings'] = adata.obsm['X_embedding']
-#     data['grid_assign'] = point_gridLabels.tolist()
-#     data['grid_pos'] = grid_centers.tolist()
-#     data['grid_size'] = grid_size
-#     data['grid_bounds'] = gird_bounds
-#     # data['GeneVelos2D'] = velo2D.tolist()
-#     data['VeloDirCI'] = VeloDirCI
-#     data['meanVelo'] = meanVelos
-#     data['grid_colors'] = grid_colors
-#     data['Genes'] = adata.var_names.tolist()
+    data = {}
+    data['name'] = project_name
+    data['type'] = 'GridVis1'
+    data['nCells'] = adata.shape[0]
+    data['nGenes'] = adata.shape[1]
+    data['embeddings'] = adata.obsm['X_embedding']
+    data['grid_assign'] = point_gridLabels.tolist()
+    data['grid_pos'] = grid_centers.tolist()
+    data['grid_size'] = grid_size
+    data['grid_bounds'] = gird_bounds
+    # data['GeneVelos2D'] = velo2D.tolist()
+    data['VeloDirCI'] = VeloDirCI
+    data['meanVelo'] = meanVelos
+    data['grid_colors'] = grid_colors
+    data['Genes'] = adata.var_names.tolist()
 
-#     return jsonify(jsonify_safe(data))
+    return jsonify(jsonify_safe(data))
     
 
 # # 返回按基因z组后的模块的grid集成可视化视图数据
@@ -454,13 +454,17 @@ def read_data(project_name):
 #         # 提取gird中的速度向量
 #         mask = point_gridLabels == gid
 
-#         angles = np.array([])
-        
+#         angles = []
+#         datas = []
+
 #         for m in velo2D.keys():
 #             data = velo2D[m][mask]  # n_points * n_genes * 2
 #             data = data.reshape(-1, 2)
-#             angles = np.append(angles, np.arctan2(data[:, 1], data[:, 0]))
-        
+#             angles.append(np.arctan2(data[:, 1], data[:, 0]))
+#             datas.append(data)
+#         angles = np.concatenate(angles, axis=0)
+#         datas = np.concatenate(datas, axis=0)
+
 #         mean_intervals, mean_intervals_strengths = dir_partition(angles, bins=12)    
 
 #         # 计算平均值
@@ -530,7 +534,7 @@ def init_plot_GridVis1():
                 
         data = np.vstack([velo2D[mask] for velo2D in velo2D_list])
         
-        angles = np.append(data, np.arctan2(data[:, 1], data[:, 0]))
+        angles = np.arctan2(data[:, 1], data[:, 0])
         
         mean_intervals, mean_intervals_strengths = dir_partition(angles, bins=12)    
 

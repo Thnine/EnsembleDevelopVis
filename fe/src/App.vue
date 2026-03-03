@@ -37,7 +37,8 @@ export default {
       method:"post",
       url:"/api/init_plot_GridVis1",
       data:{
-        'project_name':['celldancer_Pancreas','Deepvelo_Pancreas','scvelo_deterministic_Pancreas','scvelo_dynamic_Pancreas','unitvelo_Pancreas']
+        'project_name':['celldancer_Pancreas','Deepvelo_Pancreas','scvelo_deterministic_Pancreas','unitvelo_Pancreas']
+        // project_name:'Pancreatic_byGenes_20neighbors_2top_velo'
       }
     }).then(res=>{
       let data = res.data;
