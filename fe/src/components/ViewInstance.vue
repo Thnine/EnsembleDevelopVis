@@ -1,6 +1,6 @@
 <template>
     <div>
-        <!-- <GridVis1 v-if="drawData.type=='GridVis1'" :drawData="drawData"></GridVis1> -->
+        <GridVis1 v-if="drawData.type=='GridVis1'" :drawData="drawData"></GridVis1>
         <GridVis2 v-if="drawData.type=='GridVis2'" :drawData="drawData"></GridVis2>
 
     </div>

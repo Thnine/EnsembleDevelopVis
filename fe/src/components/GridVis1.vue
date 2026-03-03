@@ -1,9 +1,9 @@
-<!--Grid组件-->
+<!--Grid patch组件-->
 
 <template>
     <div class="GridVis1-container">
         <svg ref="canvas" class="canvas"></svg>
-        <div class="GridVis1-controller-bar">
+        <!-- <div class="GridVis1-controller-bar">
             <el-select v-model="GeneList" multiple style="width:230px" size="mini" :collapse-tags="true">
                 <el-option
                     v-for="gene in GeneList"    
@@ -20,7 +20,7 @@
                 style="width:300px;">
             </el-autocomplete>
             <el-button type="primary" size="mini" @click="handleClickEnterButton">确定</el-button>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -68,14 +68,14 @@ export default {
             const grid_pos = self.drawData.grid_pos;
             const grid_size = self.drawData.grid_size;
             const grid_bounds = self.drawData.grid_bounds;
-            const GeneVeloDirCI = self.drawData.GeneVeloDirCI;
+            const VeloDirCI = self.drawData.VeloDirCI;
             const meanVelo = self.drawData.meanVelo;
             const grid_colors = self.drawData.grid_colors
             const patches_data = [];
             for(let i=0;i<grid_pos.length;i++){
                 patches_data.push({
                     pos:grid_pos[i],
-                    dirCI:GeneVeloDirCI[i],
+                    dirCI:VeloDirCI[i],
                     meanVelo:meanVelo[i],
                     color:grid_colors[i],
                 });
@@ -104,7 +104,10 @@ export default {
                 .data(patches_data)
                 .join('g')
                 .attr("id",(d,i)=>`grid${i}`)
-                .attr('transform', d=>`translate(${xScale(d['pos'][0])},${yScale(d['pos'][1])})`);
+                .attr('transform', d=>`translate(${xScale(d['pos'][0])},${yScale(d['pos'][1])})`)
+                .on('click',(e,d)=>{
+                    console.log(d)
+                })
 
             patches.append('circle')
                 .attr('r', grid_size/2 * (xScale(1)-xScale(0)))
@@ -114,12 +117,14 @@ export default {
             
             // arc
             const DirCIarc = d3.arc().innerRadius(0).outerRadius(grid_size/2 * (xScale(1)-xScale(0)));
+            const convertAngle = theta => -theta + Math.PI / 2;
+
             patches.selectAll('g')
                 .data(d=>d.dirCI)
                 .join('path')
                 .attr('d', d=>DirCIarc({
-                    startAngle:d['interval'][0],
-                    endAngle:d['interval'][1]
+                    startAngle:convertAngle(d['interval'][0]),
+                    endAngle:convertAngle(d['interval'][1]),
                 }))
                 .attr('fill','black')
                 .attr('opacity',d=>{
@@ -207,7 +212,7 @@ export default {
                 }).then(res=>{
                     let data = res.data;
                     // 更新GeneVeloDirCI和meanVelo
-                    this.drawData.GeneVeloDirCI = data.GeneVeloDirCI;
+                    this.drawData.VeloDirCI = data.VeloDirCI;
                     this.drawData.meanVelo = data.meanVelo;
                     
                     this.draw();
