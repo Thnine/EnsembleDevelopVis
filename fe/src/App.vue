@@ -35,9 +35,9 @@ export default {
     
     axios({
       method:"post",
-      url:"/api/init_plot_GridVis1",
+      url:"/api/init_plot_GridVis2",
       data:{
-        'project_name':['celldancer_Pancreas','Deepvelo_Pancreas','scvelo_deterministic_Pancreas','unitvelo_Pancreas']
+        'project_name':'Pancreatic_byModule_30neighbors_velo'
         // project_name:'Pancreatic_byGenes_20neighbors_2top_velo'
       }
     }).then(res=>{

@@ -638,7 +638,7 @@ def update_plot():
     }))
 
 
-
+# 简单的箭头指向
 @app.route("/init_plot_GridVis2", methods=["POST"])
 def init_plot_GridVis2():
     # 读取参数
@@ -648,7 +648,7 @@ def init_plot_GridVis2():
 
     embedding = adata.obsm['X_embedding']
     cluster_color = adata.obs['clusters_color']
-    velocity_embedding = adata.uns['velo2D']['M6']
+    velocity_embedding = adata.uns['velo2D']['13']
 
 
     return jsonify(jsonify_safe({
