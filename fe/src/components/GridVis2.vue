@@ -32,7 +32,7 @@ export default {
                 bottom:20,
                 left:20
             },
-            maxArrowLength:10,
+            maxArrowLength:35,
         }
     },
     methods:{
@@ -83,7 +83,10 @@ export default {
                 .attr('fill',d=>d.color)
 
             //arrow
-
+            const arrowScale = d3.scaleSqrt()
+                .domain([0, maxVelocity])
+                .range([0, 1]) // 技巧：将 range 的起点设为 0.2 而不是 0，保证最小速率也有个可见基数
+                .clamp(true);
             const arrow = scatter.append('line')
                 .attr('x1', 0)
                 .attr('y1', 0)
@@ -94,21 +97,20 @@ export default {
                     const len = Math.hypot(vx, vy) || 1e-6;
 
                     // 归一化到 [0, 3]
-                    const arrowLen = self.maxArrowLength;
 
-                    const scale = arrowLen / len;
-
-                    return vx * scale;
+                    const scale = arrowScale(len)
+                    return self.maxArrowLength * scale * (vx / len);
                 })
                 .attr('y2', d => {
                     const vx = d.velocity[0];
                     const vy = d.velocity[1];
 
                     const len = Math.hypot(vx, vy) || 1e-6;
-                    const arrowLen = self.maxArrowLength;
-                    const scale = arrowLen / len;
-
-                    return -vy * scale;
+                    
+                    const scale = arrowScale(len)
+                    
+                    
+                    return -self.maxArrowLength * scale * (vy / len);
                 })
                 .attr('stroke', 'black')
                 .attr('stroke-width', 1.5);

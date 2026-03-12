@@ -648,7 +648,7 @@ def init_plot_GridVis2():
 
     embedding = adata.obsm['X_embedding']
     cluster_color = adata.obs['clusters_color']
-    velocity_embedding = adata.uns['velo2D']['13']
+    velocity_embedding = adata.uns['velo2D']['all']
 
 
     return jsonify(jsonify_safe({
